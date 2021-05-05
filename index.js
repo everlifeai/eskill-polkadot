@@ -2,6 +2,8 @@
 const cote = require('cote')
 const u = require('@elife/utils')
 
+const { ApiPromise, WsProvider } = require("@polkadot/api")
+
 function main() {
   startMicroservice()
   .then(registerWithCommMgr)
@@ -11,6 +13,15 @@ function main() {
 const msKey = 'everlife-polkadot-svc'
 
 async function startMicroservice() {
+  const wsProvider = new WsProvider('ws://127.0.0.1:9944')
+  const api = await ApiPromise.create({ provider: wsProvider })
+
+  const genesis = api.genesisHash.toHex()
+  const chainInfo = await api.registry.getChainProperties()
+  const ADDR = '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY';
+  const { nonce, data: balance } = await api.query.system.account(ADDR);
+  const lastHeader = await api.rpc.chain.getHeader();
+
   const svc = new cote.Responder({
     name: 'Everlife Polkadot Integration Skill',
     key: msKey,
@@ -20,7 +31,12 @@ async function startMicroservice() {
     if(!req.msg) return cb()
     if(!req.msg.startsWith("/polkadot")) return cb()
     cb(null, true)
-    sendReply("POLKADOT RULES!", req)
+    const reply = `YOUR CHAIN INFO:
+Account Balance: ${balance.free}
+Genesis Block: ${genesis}
+Chain Info: ${JSON.stringify(chainInfo)}
+Last Block: ${lastHeader.number}`
+    sendReply(reply, req)
   })
 }
 
