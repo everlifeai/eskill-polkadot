@@ -5,6 +5,7 @@ const u = require('@elife/utils')
 const { ApiPromise, WsProvider } = require("@polkadot/api")
 
 function main() {
+  if(!process.env.ENABLE_POLKADOT) return
   startMicroservice()
   .then(registerWithCommMgr)
   .catch(e => u.showErr(e))
