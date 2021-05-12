@@ -55,7 +55,6 @@ function sendReply(msg, req) {
 }
 
 function registerWithCommMgr() {
-  u.showErr('REGISTERING')
   commMgrClient.send({
     type: 'register-msg-handler',
     mskey: msKey,
